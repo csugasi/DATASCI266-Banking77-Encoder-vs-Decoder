@@ -1,0 +1,8 @@
+datasets
+numpy
+pandas
+matplotlib
+seaborn
+pyarrow
+scikit-learn
+transformers
