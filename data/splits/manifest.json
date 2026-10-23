@@ -14,6 +14,8 @@
     20,
     30
   ],
+  "prop_fraction": 0.5,
+  "n_prop_subset": 4807,
   "n_intents": 77,
   "n_val": 385,
   "n_full_train": 9618,
