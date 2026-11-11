@@ -4,3 +4,17 @@ __pycache__/
 .vscode/
 *.code-workspace
 .DS_Store
+
+# Secrets
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Model weights & training artifacts
+*.bin
+*.safetensors
+*.pt
+checkpoints/
+outputs/
+wandb/
