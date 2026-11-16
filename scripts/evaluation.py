@@ -1,5 +1,3 @@
-# Project: Labels vs. Scale: Breaking Even on Banking77 with Encoders and Decoders
-
 """Evaluation of model predictions.
 
 Reads the prediction CSVs in results/ (format: results/PREDICTION_FORMAT.md), checks that every
@@ -43,7 +41,9 @@ REQUIRED_COLUMNS = [
 ]
 
 MODEL_TYPE = {
-    "modernbert": "encoder",
+    "modernbert": "encoder",            # Main protocol: 3 fixed epochs
+    "modernbert_min300": "encoder",     # Variant: at least 300 steps per run
+    "modernbert_min600": "encoder",     # Extra check at k1 and k3: at least 600 steps per run
     "qwen_zeroshot": "decoder",
     "qwen_qlora": "decoder",
     "frontier": "decoder",

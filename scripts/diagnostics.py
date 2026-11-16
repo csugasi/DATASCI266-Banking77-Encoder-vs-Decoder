@@ -9,15 +9,21 @@ evaluation.py scores the prediction files. This module looks at how the models f
                                 baselines.py writes to results/diagnostics/).
   plot_tfidf_loss_vs_budget()   the same as a figure: loss against number of training examples.
 
-Training-loss curves of the neural models (loss against step) will be added here once the
-training scripts save their logs.
+summarize_pilot()             table of the ModernBERT learning-rate pilot (mean validation scores).
+  plot_training_curves()        loss and validation accuracy against training step for one budget,
+                                one line per seed (reads the logs train_modernbert.py saves).
+
+The results folder is results/ by default; in Colab pass the Drive folder as results_dir.
 
 Typical use in a notebook:
     import sys; sys.path.insert(0, "scripts")
     import diagnostics as dg
     dg.summarize_tfidf_loss().round(3)
     dg.plot_tfidf_loss_vs_budget(save_to="reports/figures/tfidf_loss_vs_budget.png")
+    dg.summarize_pilot(results_dir, rule="fixed3")
+    dg.plot_training_curves("modernbert", "k10", results_dir=results_dir)   # or "modernbert_min300"
 """
+import json
 from pathlib import Path
 
 import numpy as np
@@ -75,4 +81,58 @@ def plot_tfidf_loss_vs_budget(path=None, save_to=None):
     if save_to:
         fig.savefig(save_to, dpi=150)
     plt.close(fig)       
+    return fig
+
+# ---------------------------------------------------------------------------
+# Neural model training logs (written by train_modernbert.py)
+# ---------------------------------------------------------------------------
+def summarize_pilot(results_dir=None, rule="fixed3"):
+    """Mean validation accuracy and loss of each learning rate tried in the pilot, plus the chosen one.
+    rule is the epoch rule of the pilot: fixed3 or min300."""
+    folder = Path(results_dir) if results_dir else ev.RESULTS
+    best_file = folder / "pilot" / f"best_lr_{rule}.json"
+    if not best_file.exists():
+        raise FileNotFoundError(f"{best_file} not found. Run: python scripts/train_modernbert.py pilot --epoch-rule {rule}")
+    best = json.load(open(best_file))
+    table = pd.DataFrame(best["table"])
+    table["chosen"] = table["lr"] == best["lr"]
+    return table
+
+
+def load_training_log(model, budget, seed, results_dir=None):
+    """The logged validation curve of one run: step, epoch, train_loss, val_loss, val_acc, seconds."""
+    folder = Path(results_dir) if results_dir else ev.RESULTS
+    path = folder / "training_logs" / f"{model}_{budget}_seed{seed}.csv"
+    if not path.exists():
+        raise FileNotFoundError(f"{path} not found. Has this run finished?")
+    return pd.read_csv(path)
+
+
+def plot_training_curves(model, budget, seeds=(0, 1, 2), results_dir=None, save_to=None):
+    """Left: train and validation loss against step. Right: validation accuracy against step.
+    One line per seed. train_loss is the mean over the steps since the previous evaluation, so it is
+    measured in training mode (with dropout) and is not the same quantity as validation loss."""
+    import matplotlib.pyplot as plt
+
+    fig, (ax_loss, ax_acc) = plt.subplots(1, 2, figsize=(12, 4.5))
+    for i, seed in enumerate(seeds):
+        log = load_training_log(model, budget, seed, results_dir)
+        color = f"C{i}"
+        ax_loss.plot(log["step"], log["train_loss"], color=color, linestyle="--", alpha=0.8)
+        ax_loss.plot(log["step"], log["val_loss"], color=color, label=f"Seed {seed}")
+        ax_acc.plot(log["step"], log["val_acc"], color=color, label=f"Seed {seed}")
+    ax_loss.axhline(np.log(ev.N_LABELS), linestyle=":", color="gray")   # Loss of guessing uniformly
+    ax_loss.set_xlabel("Training step")
+    ax_loss.set_ylabel("Loss")
+    ax_loss.set_title("Loss (dashed = train, solid = validation, dotted = chance)")
+    ax_loss.legend()
+    ax_acc.set_xlabel("Training step")
+    ax_acc.set_ylabel("Validation accuracy")
+    ax_acc.set_title("Validation accuracy")
+    ax_acc.legend()
+    fig.suptitle(f"{model}, budget {budget}")
+    fig.tight_layout()
+    if save_to:
+        fig.savefig(save_to, dpi=150)
+    plt.close(fig)
     return fig
