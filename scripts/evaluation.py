@@ -46,6 +46,7 @@ MODEL_TYPE = {
     "modernbert": "encoder",
     "qwen_zeroshot": "decoder",
     "qwen_qlora": "decoder",
+    "qwen_sft": "decoder",
     "frontier": "decoder",
     "tfidf_lr": "baseline",
     "majority": "baseline",
