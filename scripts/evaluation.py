@@ -46,6 +46,7 @@ MODEL_TYPE = {
     "modernbert_min600": "encoder",     # Extra check at k1 and k3: at least 600 steps per run
     "qwen_zeroshot": "decoder",
     "qwen_qlora": "decoder",
+    "qwen_sft": "decoder",
     "frontier": "decoder",
     "tfidf_lr": "baseline",
     "majority": "baseline",
