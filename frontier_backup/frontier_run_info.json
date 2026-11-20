@@ -1,0 +1,15 @@
+{
+  "model_requested": "claude-opus-5-5",
+  "models_returned": [
+    "claude-opus-5-5"
+  ],
+  "date_utc": "2026-11-20T01:15:14",
+  "temperature": null,
+  "effort": "low",
+  "max_tokens": 2048,
+  "input_tokens": 2799856,
+  "output_tokens": 76127,
+  "cost_usd": 12.72,
+  "val_unmatched": 1,
+  "test_unmatched": 1
+}
